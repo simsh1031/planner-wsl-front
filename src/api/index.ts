@@ -99,6 +99,6 @@ export const api = {
   deleteUser: (userId: number, password: string) =>
     authFetch(`${API_BASE}/users/${userId}`, {
       method: "DELETE",
-      body: JSON.stringify({ password }),
+      headers: { "X-Password": password },  // ← body 대신 header
     }).then((r) => r.json()),
 };
