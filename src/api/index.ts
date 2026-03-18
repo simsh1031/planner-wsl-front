@@ -90,4 +90,15 @@ export const api = {
     }).then((r) => r.json()),
   completeTodo: (todoId: number) =>
     authFetch(`${API_BASE}/todos/${todoId}/complete`, { method: "PATCH" }).then((r) => r.json()),
+  updateUser: (userId: number, payload: { nickname?: string; currentPassword?: string; newPassword?: string }) =>
+    authFetch(`${API_BASE}/users/${userId}`, {
+      method: "PATCH",
+      body: JSON.stringify(payload),
+    }).then((r) => r.json()),
+
+  deleteUser: (userId: number, password: string) =>
+    authFetch(`${API_BASE}/users/${userId}`, {
+      method: "DELETE",
+      headers: { "X-Password": password },  // ← body 대신 header
+    }).then((r) => r.json()),
 };

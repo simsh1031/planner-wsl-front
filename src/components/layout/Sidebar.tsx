@@ -14,7 +14,8 @@ const NAV_ITEMS: { key: NavKey; label: string; icon: JSX.Element }[] = [
   { key: "schedule", label: "일정",  icon: <Icon.Schedule /> },
   { key: "memo",     label: "메모",  icon: <Icon.Memo />     },
   { key: "todo",     label: "할 일", icon: <Icon.Todo />     },
-  { key: "tag",      label: "태그",  icon: <Icon.Tag />      },
+  { key: "tag", label: "태그", icon: <Icon.Tag /> },
+  { key: "mypage", label: "마이페이지", icon: <Icon.MyPage /> },
 ];
 
 export default function Sidebar({ active, setActive, user, onLogout }: SidebarProps) {
