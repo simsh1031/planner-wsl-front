@@ -7,8 +7,9 @@ import MemoSection from "./sections/MemoSection";
 import TodoSection from "./sections/TodoSection";
 import TagSection from "./sections/TagSection";
 import type { User, ToastState } from "./types";
+import MyPageSection from "./sections/MyPageSection";
 
-type NavKey = "schedule" | "memo" | "todo" | "tag";
+type NavKey = "schedule" | "memo" | "todo" | "tag" | "mypage";
 
 const GLOBAL_STYLES = `
   @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=DM+Sans:wght@400;500;600;700;800&display=swap');
@@ -24,7 +25,10 @@ const GLOBAL_STYLES = `
   ::-webkit-scrollbar { width: 6px; } ::-webkit-scrollbar-track { background: transparent; } ::-webkit-scrollbar-thumb { background: #ddd; border-radius: 3px; }
 `;
 
-const SECTIONS: Record<NavKey, React.ComponentType<{ showToast: (m: string, t?: "success" | "error") => void; user: User | null }>> = {
+const SECTIONS: Record <
+  Exclude<NavKey, "mypage">,
+  React.ComponentType<{ showToast: (m: string, t?: "success" | "error") => void; user: User | null }>
+> = {
   schedule: ScheduleSection,
   memo: MemoSection,
   todo: TodoSection,
@@ -87,7 +91,11 @@ export default function App() {
             </h1>
             <p style={{ margin: "4px 0 0", color: "#888", fontSize: 14 }}>오늘도 계획적인 하루를 보내세요</p>
           </div>
-          <ActiveSection showToast={showToast} user={user} />
+          {active === "mypage" ? (
+            <MyPageSection showToast={showToast} user={user} onLogout={handleLogout} />
+          ) : (
+            <ActiveSection showToast={showToast} user={user} />
+          )}
         </main>
       </div>
       {toast && <Toast key={toast.id} message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
