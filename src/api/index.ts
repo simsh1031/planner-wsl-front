@@ -18,14 +18,26 @@ export const api = {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password }),
-    }).then((r) => r.json()),
+    }).then(async (r) => {
+      if (!r.ok) {
+        const err = Object.assign(new Error(), { status: r.status });
+        throw err;
+      }
+      return r.json();
+    }),
 
   signUp: (email: string, password: string, nickname: string) =>
     fetch(`${API_BASE}/users`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password, nickname }),
-    }).then((r) => r.json()),
+    }).then(async (r) => {
+      if (!r.ok) {
+        const err = Object.assign(new Error(), { status: r.status });
+        throw err;
+      }
+      return r.json();
+    }),
 
   getUser: (userId: number) =>
     authFetch(`${API_BASE}/users/${userId}`).then((r) => r.json()),

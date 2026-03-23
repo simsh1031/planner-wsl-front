@@ -36,8 +36,14 @@ export default function AuthPage({ onLogin, showToast }: AuthPageProps) {
           showToast("회원가입에 실패했습니다.", "error");
         }
       }
-    } catch {
-      showToast("서버 연결 오류", "error");
+    } catch (err: any) {
+      if (err?.status === 401) {
+        showToast("이메일 또는 비밀번호가 올바르지 않습니다.", "error");
+      } else if (err?.status >= 500) {
+        showToast("서버에 문제가 발생했습니다. 잠시 후 다시 시도해주세요.", "error");
+      } else {
+        showToast("서버에 연결할 수 없습니다. 네트워크를 확인해주세요.", "error");
+      }
     }
     setLoading(false);
   };
