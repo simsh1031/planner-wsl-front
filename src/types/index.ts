@@ -2,6 +2,8 @@ export interface User {
   token: string;
   email: string;
   userId: number;
+  nickname: string;
+  role: "USER" | "ADMIN";
 }
 
 export interface Schedule {

@@ -6,10 +6,14 @@ import ScheduleSection from "./sections/ScheduleSection";
 import MemoSection from "./sections/MemoSection";
 import TodoSection from "./sections/TodoSection";
 import TagSection from "./sections/TagSection";
-import type { User, ToastState } from "./types";
 import MyPageSection from "./sections/MyPageSection";
+import AdminSection from "./sections/AdminSection";
+import type { User, ToastState } from "./types";
+import { api } from "./api";
 
-type NavKey = "schedule" | "memo" | "todo" | "tag" | "mypage";
+type UserNavKey = "schedule" | "memo" | "todo" | "tag" | "mypage";
+type AdminNavKey = "adminUsers";
+export type NavKey = UserNavKey | AdminNavKey;
 
 const GLOBAL_STYLES = `
   @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=DM+Sans:wght@400;500;600;700;800&display=swap');
@@ -25,8 +29,8 @@ const GLOBAL_STYLES = `
   ::-webkit-scrollbar { width: 6px; } ::-webkit-scrollbar-track { background: transparent; } ::-webkit-scrollbar-thumb { background: #ddd; border-radius: 3px; }
 `;
 
-const SECTIONS: Record <
-  Exclude<NavKey, "mypage">,
+const USER_SECTIONS: Record<
+  Exclude<UserNavKey, "mypage">,
   React.ComponentType<{ showToast: (m: string, t?: "success" | "error") => void; user: User | null }>
 > = {
   schedule: ScheduleSection,
@@ -41,11 +45,23 @@ export default function App() {
   const [toast, setToast] = useState<ToastState | null>(null);
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    const email = localStorage.getItem("email");
-    const userId = localStorage.getItem("userId");
+    const token    = localStorage.getItem("token");
+    const email    = localStorage.getItem("email");
+    const userId   = localStorage.getItem("userId");
+    const nickname = localStorage.getItem("nickname");
+    const role     = localStorage.getItem("role") as "USER" | "ADMIN" | null;
+
     if (token && email && userId) {
-      setUser({ token, email, userId: Number(userId) });
+      const restoredUser: User = {
+        token,
+        email,
+        userId: Number(userId),
+        nickname: nickname ?? "",
+        role: role ?? "USER",
+      };
+      setUser(restoredUser);
+      // 관리자라면 기본 탭을 adminUsers로
+      if (role === "ADMIN") setActive("adminUsers");
     }
   }, []);
 
@@ -53,21 +69,47 @@ export default function App() {
     setToast({ id: Date.now(), message, type });
   }, []);
 
-  const handleLogin = (userData: User) => {
-    localStorage.setItem("token", userData.token);
-    localStorage.setItem("email", userData.email);
-    localStorage.setItem("userId", String(userData.userId));
-    setUser(userData);
+  const handleLogin = async (userData: User) => {
+    // 로그인 응답에 nickname/role이 없을 수 있으므로 getUser로 보완
+    let fullUser = userData;
+    try {
+      const detail = await api.getUser(userData.userId);
+      if (detail.userId) {
+        fullUser = {
+          ...userData,
+          nickname: detail.nickname ?? "",
+          role: detail.role ?? "USER",
+        };
+      }
+    } catch {
+      // 실패해도 로그인은 유지
+    }
+
+    localStorage.setItem("token",    fullUser.token);
+    localStorage.setItem("email",    fullUser.email);
+    localStorage.setItem("userId",   String(fullUser.userId));
+    localStorage.setItem("nickname", fullUser.nickname);
+    localStorage.setItem("role",     fullUser.role);
+
+    setUser(fullUser);
+    // 관리자라면 기본 탭을 adminUsers로
+    setActive(fullUser.role === "ADMIN" ? "adminUsers" : "schedule");
   };
 
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("email");
     localStorage.removeItem("userId");
+    localStorage.removeItem("nickname");
+    localStorage.removeItem("role");
     setUser(null);
+    setActive("schedule");
   };
 
-  const ActiveSection = SECTIONS[active];
+  /* ── 헤더 문구 ── */
+  const headerText = user?.role === "ADMIN"
+    ? { title: "관리자 페이지 🛡️", sub: "회원 정보를 조회하고 관리하세요" }
+    : { title: "안녕하세요 👋",     sub: "오늘도 계획적인 하루를 보내세요" };
 
   if (!user) {
     return (
@@ -79,6 +121,17 @@ export default function App() {
     );
   }
 
+  const isAdmin = user.role === "ADMIN";
+
+  /* ── 일반 유저 섹션 렌더링 ── */
+  const renderUserSection = () => {
+    if (active === "mypage") {
+      return <MyPageSection showToast={showToast} user={user} onLogout={handleLogout} />;
+    }
+    const ActiveSection = USER_SECTIONS[active as Exclude<UserNavKey, "mypage">];
+    return ActiveSection ? <ActiveSection showToast={showToast} user={user} /> : null;
+  };
+
   return (
     <>
       <style>{GLOBAL_STYLES}</style>
@@ -87,15 +140,16 @@ export default function App() {
         <main style={{ flex: 1, padding: "40px 44px", overflowY: "auto", background: "#F7F7F7", minHeight: "100vh" }}>
           <div style={{ marginBottom: 32 }}>
             <h1 style={{ margin: 0, fontSize: 28, fontWeight: 800, color: "#454545", fontFamily: "'Playfair Display', serif" }}>
-              안녕하세요 👋
+              {headerText.title}
             </h1>
-            <p style={{ margin: "4px 0 0", color: "#888", fontSize: 14 }}>오늘도 계획적인 하루를 보내세요</p>
+            <p style={{ margin: "4px 0 0", color: "#888", fontSize: 14 }}>{headerText.sub}</p>
           </div>
-          {active === "mypage" ? (
-            <MyPageSection showToast={showToast} user={user} onLogout={handleLogout} />
-          ) : (
-            <ActiveSection showToast={showToast} user={user} />
-          )}
+
+          {/* 관리자 / 일반 유저 분기 */}
+          {isAdmin
+            ? <AdminSection showToast={showToast} />
+            : renderUserSection()
+          }
         </main>
       </div>
       {toast && <Toast key={toast.id} message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
