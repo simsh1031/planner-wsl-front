@@ -90,6 +90,7 @@ export const api = {
     }).then((r) => r.json()),
   completeTodo: (todoId: number) =>
     authFetch(`${API_BASE}/todos/${todoId}/complete`, { method: "PATCH" }).then((r) => r.json()),
+
   updateUser: (userId: number, payload: { nickname?: string; currentPassword?: string; newPassword?: string }) =>
     authFetch(`${API_BASE}/users/${userId}`, {
       method: "PATCH",
@@ -99,6 +100,26 @@ export const api = {
   deleteUser: (userId: number, password: string) =>
     authFetch(`${API_BASE}/users/${userId}`, {
       method: "DELETE",
-      headers: { "X-Password": password },  // ← body 대신 header
+      headers: { "X-Password": password },
     }).then((r) => r.json()),
+
+  // ── 관리자 전용 API ──────────────────────────────────────
+  admin: {
+    getAllUsers: () =>
+      authFetch(`${API_BASE}/admin/users`).then((r) => r.json()),
+
+    getUser: (userId: number) =>
+      authFetch(`${API_BASE}/admin/users/${userId}`).then((r) => r.json()),
+
+    updateUser: (userId: number, payload: { nickname?: string; newPassword?: string }) =>
+      authFetch(`${API_BASE}/admin/users/${userId}`, {
+        method: "PATCH",
+        body: JSON.stringify(payload),
+      }).then((r) => r.json()),
+
+    deleteUser: (userId: number) =>
+      authFetch(`${API_BASE}/admin/users/${userId}`, {
+        method: "DELETE",
+      }).then((r) => r.json()),
+  },
 };
