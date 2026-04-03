@@ -1,4 +1,5 @@
-const API_BASE = "http://localhost:8080/api";
+// const API_BASE = "http://localhost:8080/api";
+const API_BASE = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8080/api";
 
 export const authFetch = (url: string, options: RequestInit = {}): Promise<Response> => {
   const token = localStorage.getItem("token");

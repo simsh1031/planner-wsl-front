@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { api } from "../api";
-import { Card, SectionHeader } from "../components/common";
+import { SectionHeader } from "../components/common";
 import Modal from "../components/common/Modal";
 import { Icon } from "../components/icons";
 import { inputStyle, labelStyle, btnPrimary, btnSecondary, btnDanger, TAG_COLORS } from "../styles/common";
