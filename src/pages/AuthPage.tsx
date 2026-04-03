@@ -22,7 +22,13 @@ export default function AuthPage({ onLogin, showToast }: AuthPageProps) {
       if (mode === "login") {
         const res = await api.login(form.email, form.password);
         if (res.accessToken) {
-          onLogin({ token: res.accessToken, email: form.email, userId: res.userId });
+          onLogin({ 
+            token: res.accessToken, 
+            email: form.email, 
+            userId: res.userId,
+            nickname: res.nickname || "", // 서버에서 주는 값이 없다면 빈 문자열
+            role: res.role || "USER"      // 기본값 설정
+          });
           showToast("로그인 성공!", "success");
         } else {
           showToast("로그인에 실패했습니다.", "error");
