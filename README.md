@@ -310,13 +310,13 @@ docker build -t planner-front:latest .
 docker run -p 80:80 planner-front:latest
 ```
 
+### 정적 호스팅 (Netlify, Vercel 등)
+1. `npm run build` 실행
+2. `dist/` 폴더를 호스팅 서비스에 배포
+3. 환경 변수 설정 (VITE_API_BASE_URL)
+
 ---
 
 ## 11. 참고
 
 - **Notion**: [프로젝트 문서](https://www.notion.so/wsl-31ae46a3dc7d800eafb6f9b2b94a3130?source=copy_link)
-
-### 정적 호스팅 (Netlify, Vercel 등)
-1. `npm run build` 실행
-2. `dist/` 폴더를 호스팅 서비스에 배포
-3. 환경 변수 설정 (VITE_API_BASE_URL)
